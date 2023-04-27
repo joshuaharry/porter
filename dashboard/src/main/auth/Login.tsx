@@ -9,6 +9,10 @@ import community from "assets/community.png";
 import GoogleIcon from "assets/GoogleIcon";
 
 import api from "shared/api";
+import {
+  AuthenticationResult,
+  AUTHENTICATION_RESULTS,
+} from "shared/auth/types";
 import { emailRegex } from "shared/regex";
 import { Context } from "shared/Context";
 
@@ -28,11 +32,9 @@ type Props = {
 const getWindowDimensions = () => {
   const { innerWidth: width, innerHeight: height } = window;
   return { width, height };
-}
+};
 
-const Login: React.FC<Props> = ({
-  authenticate,
-}) => {
+const Login: React.FC<Props> = ({ authenticate }) => {
   const { setUser, setCurrentError } = useContext(Context);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -42,7 +44,9 @@ const Login: React.FC<Props> = ({
   const [hasGithub, setHasGithub] = useState(true);
   const [hasGoogle, setHasGoogle] = useState(false);
   const [hasResetPassword, setHasResetPassword] = useState(true);
-  const [windowDimensions, setWindowDimensions] = useState(getWindowDimensions());
+  const [windowDimensions, setWindowDimensions] = useState(
+    getWindowDimensions()
+  );
 
   const handleLogin = (): void => {
     if (!emailRegex.test(email)) {
@@ -50,17 +54,17 @@ const Login: React.FC<Props> = ({
     } else if (password === "") {
       setCredentialError(true);
     } else {
-      api.logInUser(
-        "",
-        { email: email, password: password },
-        {}
-      )
+      api
+        .logInUser("", { email: email, password: password }, {})
         .then((res) => {
           if (res?.data?.redirect) {
             window.location.href = res.data.redirect;
           } else {
             setUser(res?.data?.id, res?.data?.email);
-            authenticate();
+            authenticate().then((success) => {
+              if (success === AUTHENTICATION_RESULTS.SUCCESS) return;
+              setCurrentError("Server forbid authentication.");
+            });
           }
         })
         .catch((err) => setCurrentError(err.response.data.error));
@@ -74,7 +78,7 @@ const Login: React.FC<Props> = ({
   const handleKeyDown = (e: any) => {
     if (e.key === "Enter") {
       handleLogin();
-    };
+    }
   };
 
   // Manually re-register event listener on email/password change
@@ -87,9 +91,9 @@ const Login: React.FC<Props> = ({
   }, [email, password]);
 
   useEffect(() => {
-
     // Get capabilities to case on login methods
-    api.getMetadata("", {}, {})
+    api
+      .getMetadata("", {}, {})
       .then((res) => {
         setHasBasic(res.data?.basic_login);
         setHasGithub(res.data?.github_login);
@@ -102,9 +106,9 @@ const Login: React.FC<Props> = ({
     const emailFromCLI = urlParams.get("email");
     emailFromCLI && setEmail(emailFromCLI);
 
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
     return () => {
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener("resize", handleResize);
     };
   }, []);
 
@@ -152,9 +156,7 @@ const Login: React.FC<Props> = ({
             <Spacer y={2} />
           </Flex>
         )}
-        <Heading isAtTop>
-          Log in to your Porter account
-        </Heading>
+        <Heading isAtTop>Log in to your Porter account</Heading>
         <Spacer y={1} />
         {(hasGithub || hasGoogle) && (
           <>
@@ -165,9 +167,7 @@ const Login: React.FC<Props> = ({
                   Log in with GitHub
                 </OAuthButton>
               )}
-              {hasGithub && hasGoogle && (
-                <Spacer inline x={2} />
-              )}
+              {hasGithub && hasGoogle && <Spacer inline x={2} />}
               {hasGoogle && (
                 <OAuthButton onClick={googleRedirect}>
                   <StyledGoogleIcon />
@@ -226,11 +226,10 @@ const Login: React.FC<Props> = ({
           </>
         )}
         <Spacer y={1} />
-        <Text
-          size={13}
-          color="helper"
-        >
-          Don't have an account?<Spacer width="5px" inline /><Link to="/register">Sign up</Link>
+        <Text size={13} color="helper">
+          Don't have an account?
+          <Spacer width="5px" inline />
+          <Link to="/register">Sign up</Link>
         </Text>
       </Wrapper>
     </StyledLogin>

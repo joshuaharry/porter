@@ -43,6 +43,7 @@ DB_USER=porter
 DB_PASS=porter
 DB_NAME=porter
 SQL_LITE=false
+COOKIE_INSECURE=true
 ```
 
 Finally, run `make start-dev` from the root of the project. If you have all the dependencies set up correctly, things should just work.

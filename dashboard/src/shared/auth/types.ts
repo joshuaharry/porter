@@ -29,3 +29,10 @@ export enum ScopeTypeEnum {
 }
 
 export type HIERARCHY_TREE = { [key: string]: any };
+
+export const AUTHENTICATION_RESULTS = {
+  SUCCESS: 'SUCCESS',
+  FAILURE: 'FAILURE',
+} as const;
+
+export type AuthenticationResult = keyof typeof AUTHENTICATION_RESULTS;

@@ -34,5 +34,5 @@ if [[ ! -d ./dashboard/node_modules ]]; then
   cd ./dashboard && npm install --legacy-peer-deps;
   cd ../;  
 else
-  echo "Node modules found! Proceeding to start server"
+  echo "Node modules found - skipping npm install --legacy-peer-deps"
 fi
